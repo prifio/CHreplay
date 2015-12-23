@@ -1,4 +1,4 @@
-﻿namespace coins_hokke
+﻿namespace coins_hockey
 {
     partial class Form1
     {

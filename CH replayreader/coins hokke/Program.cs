@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace coins_hokke
+namespace coins_hockey
 {
     public static class Program
     {

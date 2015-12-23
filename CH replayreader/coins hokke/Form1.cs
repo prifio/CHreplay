@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace coins_hokke
+namespace coins_hockey
 {
     public partial class Form1 : Form
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace coins_hokke.Properties
+namespace coins_hockey.Properties
 {
 
 

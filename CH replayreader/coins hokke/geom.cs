@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace coins_hokke
+namespace coins_hockey
 {
     class geom
     {
