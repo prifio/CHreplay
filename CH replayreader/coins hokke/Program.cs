@@ -23,6 +23,10 @@ namespace coins_hockey
             Application.SetCompatibleTextRenderingDefault(false);
             var MainForm = new Form1();
             MainForm.Show();
+
+            Z.clwidth = MainForm.ClientSize.Width;
+            Z.clheight = MainForm.ClientSize.Height;
+
             var oup = System.IO.File.OpenText("replay.chrpl");
             x = new List<int[]>();
             y = new List<int[]>();
@@ -66,6 +70,16 @@ namespace coins_hockey
         public static void getgrp1(System.Drawing.Graphics g)
         {
             g.Clear(System.Drawing.Color.White);
+
+            g.FillRectangle(System.Drawing.Brushes.Maroon, 0, 0, Z.radangl, Z.radangl);
+            g.FillEllipse(System.Drawing.Brushes.White, 1, 0, Z.radangl * 2, Z.radangl * 2);
+            g.FillRectangle(System.Drawing.Brushes.Maroon, Z.clwidth - Z.radangl, 0, Z.radangl, Z.radangl);
+            g.FillEllipse(System.Drawing.Brushes.White, Z.clwidth - 2 * Z.radangl - 1, 0, Z.radangl * 2, Z.radangl * 2);
+            g.FillRectangle(System.Drawing.Brushes.Maroon, 0, Z.clheight - Z.radangl, Z.radangl, Z.radangl);
+            g.FillEllipse(System.Drawing.Brushes.White, 1, Z.clheight - 2 * Z.radangl - 1, Z.radangl * 2, Z.radangl * 2);
+            g.FillRectangle(System.Drawing.Brushes.Maroon, Z.clwidth - Z.radangl, Z.clheight - Z.radangl, Z.radangl, Z.radangl);
+            g.FillEllipse(System.Drawing.Brushes.White, Z.clwidth - 2 * Z.radangl - 1, Z.clheight - 2 * Z.radangl - 1, Z.radangl * 2, Z.radangl * 2);
+
             g.FillRectangle(System.Drawing.Brushes.Red, 0, 532 / 2 - 50, 3, 100);
             g.FillRectangle(System.Drawing.Brushes.Red, 790, 532 / 2 - 50, 3, 100);
             for (int i = 0; i < 4; i++)
@@ -79,7 +93,7 @@ namespace coins_hockey
                 g.DrawImage(Z.tcoin[nh].picob, xh - Z.tcoin[nh].r, yh - Z.tcoin[nh].r, 2 * Z.tcoin[nh].r, 2 * Z.tcoin[nh].r);
             }
             var f = new System.Drawing.Font("Arial", 30);
-            g.DrawString(ysk.ToString(), f, System.Drawing.Brushes.Black, 0, 0);
+            g.DrawString(ysk.ToString(), f, System.Drawing.Brushes.Black, 60, 0);
             //
             //g.DrawString(Z.ch1.ToString() + " : " + Z.ch2.ToString(), f, System.Drawing.Brushes.Black, 793 / 2 - 40, 5);
         }
@@ -121,8 +135,8 @@ namespace coins_hockey
             r = r1;
             stoim = s1;
             name = n;
-            picob = Image.FromFile(fileor + ras);
-            picre = Image.FromFile(filere + ras);
+            picob = Image.FromFile("textures\\" + fileor + ras);
+            picre = Image.FromFile("textures\\" + filere + ras);
         }
     }
 }

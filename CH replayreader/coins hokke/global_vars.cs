@@ -41,6 +41,7 @@ namespace coins_hockey
             new cointype(27, 627, 100, "Loonie (1 CAD)","1cdo","1cdr"),
             new cointype(28, 692, 200, "Toonie (2 CAD)","2cdo","2cdr")
         };
-
+        public static int radangl = 100;
+        public static int clwidth, clheight;
     }
 }
