@@ -70,7 +70,11 @@ namespace coins_hockey
         public static void getgrp1(System.Drawing.Graphics g)
         {
             g.Clear(System.Drawing.Color.White);
-
+            g.DrawLine(new Pen(Color.Maroon), 0, 0, Z.clwidth, 0);
+            g.DrawLine(new Pen(Color.Maroon), 0, 0, 0, Z.clheight);
+            g.DrawLine(new Pen(Color.Maroon), Z.clwidth - 1, 0, Z.clwidth - 1, Z.clheight - 1);
+            g.DrawLine(new Pen(Color.Maroon), 0, Z.clheight - 1, Z.clwidth - 1, Z.clheight - 1);
+            
             g.FillRectangle(System.Drawing.Brushes.Maroon, 0, 0, Z.radangl, Z.radangl);
             g.FillEllipse(System.Drawing.Brushes.White, 1, 0, Z.radangl * 2, Z.radangl * 2);
             g.FillRectangle(System.Drawing.Brushes.Maroon, Z.clwidth - Z.radangl, 0, Z.radangl, Z.radangl);

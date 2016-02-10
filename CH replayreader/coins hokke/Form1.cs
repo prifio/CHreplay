@@ -21,6 +21,7 @@ namespace coins_hockey
             this.pictureBox1.MouseDown += Program.mdklik;
             this.pictureBox1.MouseUp += Program.muklik;
             this.pictureBox1.MouseMove += Program.mmklik;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
         }
 
         private void Form1_Load(object sender, EventArgs e)
