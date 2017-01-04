@@ -64,7 +64,10 @@
         {
             var bmp = new System.Drawing.Bitmap(this.Width, this.Height);
             var g = System.Drawing.Graphics.FromImage(bmp);
-            Program.getgrp1(g);
+            if (Program.sit == 1)
+                Program.graphic_play(g);
+            else
+                Program.graphic_pick(g);
             e.Graphics.DrawImage(bmp, 0, 0);
         }
 

@@ -33,15 +33,9 @@ namespace coins_hockey
             new cointype(18, 325, 375, "5 penny","5po","5pr"),
             new cointype(25, 650, 750, "10 penny","10po","10pr"),
             new cointype(23, 950, 7500, "1 pound","1fo","1fr"),
-            new cointype(28, 1200, 15000, "2 pound","2fo","2fr"),            
-            new cointype(19, 235, 1, "Canada penny","1cco","1ccr"),
-            new cointype(21, 395, 5, "Nickel (0.05 CAD)","5cco","5ccr"),
-            new cointype(24, 440, 25, "Quarter (0.25 CAD)","25cco","25ccr"),
-            new cointype(24, 440, 50, "50 canada cents","50cco","50ccr"),
-            new cointype(27, 627, 100, "Loonie (1 CAD)","1cdo","1cdr"),
-            new cointype(28, 692, 200, "Toonie (2 CAD)","2cdo","2cdr")
+            new cointype(28, 1200, 15000, "2 pound","2fo","2fr")
         };
         public static int radangl = 100;
-        public static int clwidth, clheight;
+        public static int clwidth = 100, clheight = 100;
     }
 }

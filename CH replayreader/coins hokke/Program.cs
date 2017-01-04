@@ -13,61 +13,49 @@ namespace coins_hockey
         /// Главная точка входа для приложения.
         /// </summary>
         //[STAThread]
-        public const int tipmon = 32;
+        public const int type_mon = 26;
         public static List<int[]> x, y, n;
         public static long yk = 0, time = 0;
         public static double ysk = 1.0;
+        private static string file_read = "";
+        public static int sit = 0;
+        private static int menu_pick = -1;
+
         public static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var MainForm = new Form1();
             MainForm.Show();
-
             Z.clwidth = MainForm.ClientSize.Width;
             Z.clheight = MainForm.ClientSize.Height;
-
-            var oup = System.IO.File.OpenText("replay.chrpl");
-            x = new List<int[]>();
-            y = new List<int[]>();
-            n = new List<int[]>();
-            int ih = 0;
-            while (!oup.EndOfStream)
-            {
-                x.Add(new int[11]);
-                y.Add(new int[11]);
-                n.Add(new int[11]);
-                for (int i = 0; i < 11; i++)
-                {
-                    var sr = oup.ReadLine().Split().Select(x1 => int.Parse(x1)).ToArray();
-                    x[ih][i] = sr[1];
-                    y[ih][i] = sr[2];
-                    n[ih][i] = sr[0];
-                }
-                ih++;
-            }
             var tim = new System.Diagnostics.Stopwatch();
             tim.Start();
             while (MainForm.Created)
             {
-                time += (long)(tim.ElapsedMilliseconds * ysk);
+                if (sit == 1)
+                {
+                    time += (long)(tim.ElapsedMilliseconds * ysk);
+                    update(time);
+                }
                 tim.Restart();
                 MainForm.drawoll();
                 Application.DoEvents();
-                prd(time);
             }
         }
-        public static void prd(long tick)
+        public static void update(long tick)
         {
-            while (yk * 21 < time) yk++;
-            while (yk * 21 - 21 > time) yk--;
+            while (yk * 21 < time)
+                yk++;
+            while (yk * 21 - 21 > time)
+                yk--;
             if (yk >= x.Count || yk < 0)
             {
                 yk = 0;
                 time = 0;
             }
         }
-        public static void getgrp1(System.Drawing.Graphics g)
+        public static void graphic_play(Graphics g)
         {
             g.Clear(System.Drawing.Color.White);
             g.DrawLine(new Pen(Color.Maroon), 0, 0, Z.clwidth, 0);
@@ -101,23 +89,93 @@ namespace coins_hockey
             //
             //g.DrawString(Z.ch1.ToString() + " : " + Z.ch2.ToString(), f, System.Drawing.Brushes.Black, 793 / 2 - 40, 5);
         }
+        public static void graphic_pick(Graphics g)
+        {
+            g.Clear(Color.Maroon);
+            var fn = new System.Drawing.Font("Courier", 20);
+            g.DrawString("Введите имя файла, в котором записан ваш replay", fn, Brushes.White, 75, 200);
+            g.FillRectangle(Brushes.White, 190, 260, 420, 50);
+            g.DrawString(file_read, fn, Brushes.Black, 210, 265);
+            fn = new System.Drawing.Font("Courier", 30);
+            if (menu_pick == 1)
+                g.DrawString("Далее", fn, Brushes.White, 325, 350);
+            else
+                g.DrawString("Далее", fn, Brushes.Bisque, 325, 350);
+        }
+        public static void read_data()
+        {
+            if (file_read == "")
+                return;
+            try
+            {
+                var oup = System.IO.File.OpenText(file_read + ".chrpl");
+                x = new List<int[]>();
+                y = new List<int[]>();
+                n = new List<int[]>();
+                int ih = 0;
+                while (!oup.EndOfStream)
+                {
+                    x.Add(new int[11]);
+                    y.Add(new int[11]);
+                    n.Add(new int[11]);
+                    for (int i = 0; i < 11; i++)
+                    {
+                        var sr = oup.ReadLine().Split().Select(x1 => int.Parse(x1)).ToArray();
+                        x[ih][i] = sr[1];
+                        y[ih][i] = sr[2];
+                        n[ih][i] = sr[0];
+                    }
+                    ih++;
+                }
+                oup.Close();
+                sit = 1;
+            }
+            catch { }
+        }
         public static void klik(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == System.Windows.Forms.Keys.F) ysk = Math.Min(ysk * 2, 64);
-            if (e.KeyCode == System.Windows.Forms.Keys.S) ysk = Math.Max(0.25, ysk / 2);
-            if (e.KeyCode == System.Windows.Forms.Keys.P && ysk != 0) ysk = 0;
-            else
-                if (e.KeyCode == System.Windows.Forms.Keys.P) ysk = 1;
-            if (e.KeyCode == System.Windows.Forms.Keys.N) time += 1500;
-            if (e.KeyCode == System.Windows.Forms.Keys.A) time -= 1500;
+            if (sit == 0)
+            {
+                int code = (int)e.KeyCode;
+                if (code >= (int)Keys.A && code <= (int)Keys.Z && file_read.Length <= 12)
+                {
+                    char c = (char)(code - Keys.A + 'a');
+                    file_read += c;
+                }
+                if (code >= (int)Keys.D0 && code <= (int)Keys.D9 && file_read.Length <= 12)
+                {
+                    char c = (char)(code - Keys.D0 + '0');
+                    file_read += c;
+                }
+                if (code == (int)Keys.Back && file_read.Length > 0)
+                    file_read = file_read.Substring(0, file_read.Length - 1);
+                if (code == (int)Keys.Enter)
+                    read_data();
+                return;
+            }
+            if (sit == 1)
+            {
+                if (e.KeyCode == System.Windows.Forms.Keys.F) ysk = Math.Min(ysk * 2, 64);
+                if (e.KeyCode == System.Windows.Forms.Keys.S) ysk = Math.Max(0.25, ysk / 2);
+                if (e.KeyCode == System.Windows.Forms.Keys.P && ysk != 0) ysk = 0;
+                else
+                    if (e.KeyCode == System.Windows.Forms.Keys.P) ysk = 1;
+                if (e.KeyCode == System.Windows.Forms.Keys.N) time += 1500;
+                if (e.KeyCode == System.Windows.Forms.Keys.A) time -= 1500;
+            }
         }
         public static void mdklik(object sender, MouseEventArgs e)
         {
-
+            if (menu_pick == 1 && sit == 0)
+                read_data();
+                
         }
         public static void mmklik(object sender, MouseEventArgs e)
         {
-
+            if (sit == 0 && e.X >= 320 && e.X <= Z.clwidth - 320 && e.Y >= 345 && e.Y <= 395)
+                menu_pick = 1;
+            else
+                menu_pick = -1;
         }
         public static void muklik(object sender, MouseEventArgs e)
         {
