@@ -27,7 +27,7 @@ namespace coins_hockey
         private static Image ago_dark, next_dark, fast_dark, slow_dark, play_dark, pause_dark;
         private static int replay_time, cnt_tick;
 
-        public static void Main()
+        public static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -43,6 +43,24 @@ namespace coins_hockey
             fast_dark = Image.FromFile("./textures/faster_dark.png");
             play_dark = Image.FromFile("./textures/play_dark.png");
             pause_dark = Image.FromFile("./textures/pause_dark.png");
+            try
+            {
+                var fl = File.OpenText("./data.txt");
+                file_read = fl.ReadLine();
+                fl.Close();
+            }
+            catch
+            {
+                try
+                {
+                    var fl = File.CreateText("./data.txt");
+                    fl.WriteLine("replay");
+                    fl.Close();
+                    file_read = "replay";
+                }
+                catch { }
+            }
+            file_exist = Directory.GetFiles("./").Select(s => s.ToLower()).Contains("./" + file_read + ".chrpl");
             var MainForm = new Form1();
             MainForm.Show();
             Z.clwidth = MainForm.ClientSize.Width;
@@ -81,7 +99,7 @@ namespace coins_hockey
             g.DrawLine(new Pen(Color.Maroon), 0, 0, 0, Z.clheight);
             g.DrawLine(new Pen(Color.Maroon), Z.clwidth - 1, 0, Z.clwidth - 1, Z.clheight - 1);
             g.DrawLine(new Pen(Color.Maroon), 0, Z.clheight - 1, Z.clwidth - 1, Z.clheight - 1);
-            
+
             g.FillRectangle(System.Drawing.Brushes.Maroon, 0, 0, Z.radangl, Z.radangl);
             g.FillEllipse(System.Drawing.Brushes.White, 1, 0, Z.radangl * 2, Z.radangl * 2);
             g.FillRectangle(System.Drawing.Brushes.Maroon, Z.clwidth - Z.radangl, 0, Z.radangl, Z.radangl);
@@ -256,7 +274,7 @@ namespace coins_hockey
                 if (e.Y >= Z.clheight - 10 && e.Y < Z.clheight && Math.Abs(e.X - Z.clwidth * time / replay_time) <= 5)
                 {
                     is_moving = true;
-                }                
+                }
                 if (button_pick == 0)
                     ago();
                 if (button_pick == 1)
@@ -295,27 +313,39 @@ namespace coins_hockey
         {
             is_moving = false;
         }
-    }
-
-    class cointype
-    {
-        public int r { get; set; }
-        public int m { get; set; }
-        public int stoim { get; set; }
-        public string name { get; set; }
-        public System.Drawing.Image picob { get; set; }
-        public Image picre { get; set; }
-        public cointype(int r1, int m1, int s1, string n, string fileor, string filere, string ras = ".png")
+        public static void close(object sender, EventArgs e)
         {
-            m = m1;
-            r = r1;
-            stoim = s1;
-            name = n;
-            picob = Image.FromFile("textures\\" + fileor + ras);
-            picre = Image.FromFile("textures\\" + filere + ras);
+            if (file_read != "")
+                try
+                {
+                    var fl = File.CreateText("./data.txt");
+                    fl.WriteLine(file_read);
+                    fl.Close();
+                }
+                catch { }
         }
     }
 }
+
+class cointype
+{
+    public int r { get; set; }
+    public int m { get; set; }
+    public int stoim { get; set; }
+    public string name { get; set; }
+    public System.Drawing.Image picob { get; set; }
+    public Image picre { get; set; }
+    public cointype(int r1, int m1, int s1, string n, string fileor, string filere, string ras = ".png")
+    {
+        m = m1;
+        r = r1;
+        stoim = s1;
+        name = n;
+        picob = Image.FromFile("textures\\" + fileor + ras);
+        picre = Image.FromFile("textures\\" + filere + ras);
+    }
+}
+
 
 //(x1m1+x2m2)k3-(y1m1+y2m2)
 //m2k4-m2k3
