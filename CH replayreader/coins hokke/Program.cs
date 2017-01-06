@@ -322,9 +322,6 @@ namespace coins_hockey
             }
             catch (Exception excpt)
             {
-                var dich = File.CreateText("./dich.txt");
-                dich.WriteLine(excpt.ToString());
-                dich.Close();
             }
         }
         public static void klik(object sender, KeyEventArgs e)
@@ -344,7 +341,6 @@ namespace coins_hockey
                 }
                 if (code == (int)Keys.Back && file_read.Length > 0)
                     file_read = file_read.Substring(0, file_read.Length - 1);
-                var dich = Directory.GetFiles("./").Select(s => s.ToLower());
                 file_exist = Directory.GetFiles("./").Select(s => s.ToLower()).Contains("./" + file_read + ".chrpl");
                 if (code == (int)Keys.Enter)
                     read_data();
