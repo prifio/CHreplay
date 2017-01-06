@@ -18,6 +18,7 @@ namespace coins_hockey
         /// </summary>
         //[STAThread]
         public const int type_mon = 26;
+        public const int max_time_anim = 250;
         public static List<int[]> x, y, n;
         public static long yk = 0, time = 0;
         public static double ysk = 1.0;
@@ -28,6 +29,9 @@ namespace coins_hockey
         public static bool is_moving = false;
         private static Image ago_im, next_im, fast_im, slow_im, play_im, pause_im;
         private static Image ago_dark, next_dark, fast_dark, slow_dark, play_dark, pause_dark;
+        private static Image[] pause_anim;
+        private static bool is_anim = false;
+        private static long time_anim = max_time_anim;
         private static int replay_time, cnt_tick;
 
         public static void Main(string[] args)
@@ -48,6 +52,9 @@ namespace coins_hockey
             fast_dark = Image.FromFile("./textures/faster_dark.png");
             play_dark = Image.FromFile("./textures/play_dark.png");
             pause_dark = Image.FromFile("./textures/pause_dark.png");
+            pause_anim = new Image[7];
+            for (int i = 0; i < 7; i++)
+                pause_anim[i] = Image.FromFile("./textures/pause/" + (i + 1) + ".png");
             if (args.Length > 0)
             {
                 char[] bad = new char[2];
@@ -87,11 +94,12 @@ namespace coins_hockey
             tim.Start();
             while (MainForm.Created)
             {
+                long timer = tim.ElapsedMilliseconds;
                 if (sit == 1)
                 {
                     if (!is_moving)
-                        time += (long)(tim.ElapsedMilliseconds * ysk);
-                    update(time);
+                        time += (long)(timer * ysk);
+                    update(timer);
                 }
                 tim.Restart();
                 MainForm.drawoll();
@@ -178,6 +186,15 @@ namespace coins_hockey
                 yk = 0;
                 time = 0;
             }
+            if (is_anim)
+            {
+                time_anim += tick;
+                if (time_anim >= max_time_anim)
+                {
+                    time_anim = max_time_anim;
+                    is_anim = false;
+                }
+            }
         }
         public static void graphic_play(Graphics g)
         {
@@ -218,16 +235,7 @@ namespace coins_hockey
                 g.DrawImage(slow_im, mid - 90, Z.clheight + 5, 40, 40);
             else
                 g.DrawImage(slow_dark, mid - 90, Z.clheight + 5, 40, 40);
-
-            if (button_pick == 2 && ysk == 0)
-                g.DrawImage(play_im, mid - 20, Z.clheight + 5, 40, 40);
-            else if (ysk == 0)
-                g.DrawImage(play_dark, mid - 20, Z.clheight + 5, 40, 40);
-            else if (button_pick == 2)
-                g.DrawImage(pause_im, mid - 20, Z.clheight + 5, 40, 40);
-            else
-                g.DrawImage(pause_dark, mid - 20, Z.clheight + 5, 40, 40);
-
+            draw_pause_button(g);
             if (button_pick == 3)
                 g.DrawImage(fast_im, mid + 50, Z.clheight + 5, 40, 40);
             else
@@ -245,6 +253,24 @@ namespace coins_hockey
             g.FillEllipse(Brushes.Black, time * Z.clwidth / replay_time - 5, Z.clheight - 10, 10, 10);
             //
             //g.DrawString(Z.ch1.ToString() + " : " + Z.ch2.ToString(), f, System.Drawing.Brushes.Black, 793 / 2 - 40, 5);
+        }
+        public static void draw_pause_button(Graphics g)
+        {
+            Image for_draw;
+            int mid = Z.clwidth / 2;
+            if (is_anim && ysk != 0)
+                for_draw = pause_anim[time_anim * 7 / max_time_anim];
+            else if (is_anim)
+                for_draw = pause_anim[6 - time_anim * 7 / max_time_anim];
+            else if (button_pick == 2 && ysk == 0)
+                for_draw = play_im;
+            else if (ysk == 0)
+                for_draw = play_dark;
+            else if (button_pick == 2)
+                for_draw = pause_im;
+            else
+                for_draw = pause_dark;
+            g.DrawImage(for_draw, mid - 16, Z.clheight + 5, 32, 40);
         }
         public static void graphic_pick(Graphics g)
         {
@@ -347,6 +373,8 @@ namespace coins_hockey
                 ysk = 0;
             else
                 ysk = 1;
+            is_anim = true;
+            time_anim = max_time_anim - time_anim;
         }
         public static void slow()
         {
