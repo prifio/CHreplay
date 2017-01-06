@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.IO;
+using System.Text.RegularExpressions;
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace coins_hockey
 {
@@ -31,6 +34,8 @@ namespace coins_hockey
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            string[] path_to_exe = Application.ExecutablePath.Split(new char[] { '/', '\\' });
+            assoc("chrpl", Application.ExecutablePath, path_to_exe.Last());
             ago_im = Image.FromFile("./textures/ago.png");
             next_im = Image.FromFile("./textures/next.png");
             slow_im = Image.FromFile("./textures/slower.png");
@@ -43,24 +48,37 @@ namespace coins_hockey
             fast_dark = Image.FromFile("./textures/faster_dark.png");
             play_dark = Image.FromFile("./textures/play_dark.png");
             pause_dark = Image.FromFile("./textures/pause_dark.png");
-            try
+            if (args.Length > 0)
             {
-                var fl = File.OpenText("./data.txt");
-                file_read = fl.ReadLine();
-                fl.Close();
+                char[] bad = new char[2];
+                bad[0] = '/';
+                bad[1] = '\\';
+                string[] help = args[0].Split(new char[] { '/', '\\' });
+                string last = help.Last();
+                file_read = last.Substring(0, last.Length - 6);//.chrpl - 6 symbol
+                read_data();
             }
-            catch
+            if (sit == 0)
             {
                 try
                 {
-                    var fl = File.CreateText("./data.txt");
-                    fl.WriteLine("replay");
+                    var fl = File.OpenText("./data.txt");
+                    file_read = fl.ReadLine();
                     fl.Close();
-                    file_read = "replay";
                 }
-                catch { }
+                catch
+                {
+                    try
+                    {
+                        var fl = File.CreateText("./data.txt");
+                        fl.WriteLine("replay");
+                        fl.Close();
+                        file_read = "replay";
+                    }
+                    catch { }
+                }
+                file_exist = Directory.GetFiles("./").Select(s => s.ToLower()).Contains("./" + file_read + ".chrpl");
             }
-            file_exist = Directory.GetFiles("./").Select(s => s.ToLower()).Contains("./" + file_read + ".chrpl");
             var MainForm = new Form1();
             MainForm.Show();
             Z.clwidth = MainForm.ClientSize.Width;
@@ -80,6 +98,75 @@ namespace coins_hockey
                 Application.DoEvents();
             }
         }
+
+        public static void assoc(string Extension, string OpenWith, string ExecutableName)
+        {
+            try
+            {
+                var User_Extension = Registry.CurrentUser.CreateSubKey("." + Extension);
+                User_Extension.SetValue("", Extension + "_auto_file", RegistryValueKind.String);
+
+                var User_Classes = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Classes\\", true);
+                User_Classes.CreateSubKey("." + Extension);
+                User_Classes.SetValue("", Extension + "_auto_file", RegistryValueKind.String);
+
+                var User_AutoFile = User_Classes.CreateSubKey(Extension + "_auto_file");
+                var User_Icon = User_AutoFile.CreateSubKey("DefaultIcon");
+                string path = OpenWith.Substring(0, OpenWith.LastIndexOfAny(new char[] { '/', '\\' }));
+                User_Icon.SetValue("", path + "\\replay_ico.ico", RegistryValueKind.String);
+                var User_AutoFile_Command = User_AutoFile.CreateSubKey("shell").CreateSubKey("open").CreateSubKey("command");
+                User_AutoFile_Command.SetValue("", "\"" + OpenWith + "\"" + " \"%1\"");
+
+                try
+                {
+                    var ApplicationAssociationToasts = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\ApplicationAssociationToasts\\", true);
+                    ApplicationAssociationToasts.SetValue(Extension + "_auto_file_." + Extension, 0);
+                    ApplicationAssociationToasts.SetValue(@"Applications\" + ExecutableName + "_." + Extension, 0);
+                }
+                catch (Exception excpt)
+                {
+                    //Logger.Log_Error(@"ApplicationAssociationToasts: " + excpt.ToString());
+                }
+
+                try
+                {
+                    var User_Classes_Applications = User_Classes.CreateSubKey("Applications");
+                    var User_Classes_Applications_Exe = User_Classes_Applications.CreateSubKey(ExecutableName);
+                    User_Icon = User_Classes_Applications_Exe.CreateSubKey("DefaultIcon");
+                    User_Icon.SetValue("", path + "\\replay_ico.ico", RegistryValueKind.String);
+                    var User_Application_Command = User_Classes_Applications_Exe.CreateSubKey("shell").CreateSubKey("open").CreateSubKey("command");
+                    User_Application_Command.SetValue("", "\"" + OpenWith + "\"" + " \"%1\"");
+                }
+                catch (Exception excpt)
+                {
+                    //Logger.Log_Error(@"User_Classes_Applications: " + excpt.ToString());
+                }
+
+                var User_Explorer = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\." + Extension);
+                User_Explorer.CreateSubKey("OpenWithList").SetValue("a", ExecutableName);
+                User_Explorer.CreateSubKey("OpenWithProgids").SetValue(Extension + "_auto_file", "0");
+                try
+                {
+                    var User_Choice = User_Explorer.OpenSubKey("UserChoice");
+                    if (User_Choice != null)
+                        User_Explorer.DeleteSubKey("UserChoice");
+                    User_Explorer.CreateSubKey("UserChoice").SetValue("ProgId", @"Applications\" + ExecutableName);
+                }
+                catch (Exception excpt)
+                {
+                    //Logger.Log_Error(@"UserChoice: " + excpt.ToString());
+                }
+                SHChangeNotify(0x08000000, 0x0000, IntPtr.Zero, IntPtr.Zero);
+            }
+            catch (Exception excpt)
+            {
+                Application.Exit();
+                //Logger.Log_Error("SetAssociation_User: " + excpt.ToString());
+            }
+        }
+        [DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+
         public static void update(long tick)
         {
             while (yk * 21 < time)
@@ -110,7 +197,7 @@ namespace coins_hockey
             g.FillEllipse(System.Drawing.Brushes.White, Z.clwidth - 2 * Z.radangl - 1, Z.clheight - 2 * Z.radangl - 1, Z.radangl * 2, Z.radangl * 2);
 
             g.FillRectangle(System.Drawing.Brushes.Red, 0, 532 / 2 - 50, 3, 100);
-            g.FillRectangle(System.Drawing.Brushes.Red, 790, 532 / 2 - 50, 3, 100);
+            g.FillRectangle(System.Drawing.Brushes.Red, 789, 532 / 2 - 50, 3, 100);
             for (int i = 0; i < 4; i++)
             {
                 int xh = x[(int)yk][i], yh = y[(int)yk][i], nh = n[(int)yk][i];
@@ -271,9 +358,13 @@ namespace coins_hockey
                 read_data();
             if (sit == 1)
             {
-                if (e.Y >= Z.clheight - 10 && e.Y < Z.clheight && Math.Abs(e.X - Z.clwidth * time / replay_time) <= 5)
+                if (e.Y >= Z.clheight - 10 && e.Y < Z.clheight && e.X > 0)// Math.Abs(e.X - Z.clwidth * time / replay_time) <= 5)
                 {
                     is_moving = true;
+                    int x = Math.Min(e.X, Z.clwidth);
+                    time = replay_time * x / Z.clwidth;
+                    yk = cnt_tick * x / Z.clwidth;
+                    update(0);
                 }
                 if (button_pick == 0)
                     ago();
