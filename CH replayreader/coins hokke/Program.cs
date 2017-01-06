@@ -33,12 +33,15 @@ namespace coins_hockey
         private static bool is_anim = false;
         private static long time_anim = max_time_anim;
         private static int replay_time, cnt_tick;
+        private static bool from_file = false;
 
         public static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             string[] path_to_exe = Application.ExecutablePath.Split(new char[] { '/', '\\' });
+            Directory.SetCurrentDirectory(Application.ExecutablePath.Substring(0, Application.ExecutablePath.LastIndexOfAny(new char[] { '/', '\\' })));
+            Z.init();
             assoc("chrpl", Application.ExecutablePath, path_to_exe.Last());
             ago_im = Image.FromFile("./textures/ago.png");
             next_im = Image.FromFile("./textures/next.png");
@@ -57,13 +60,13 @@ namespace coins_hockey
                 pause_anim[i] = Image.FromFile("./textures/pause/" + (i + 1) + ".png");
             if (args.Length > 0)
             {
-                char[] bad = new char[2];
-                bad[0] = '/';
-                bad[1] = '\\';
-                string[] help = args[0].Split(new char[] { '/', '\\' });
-                string last = help.Last();
-                file_read = last.Substring(0, last.Length - 6);//.chrpl - 6 symbol
+                file_read = args[0].Substring(0, args[0].Length - 6);//.chrpl - 6 symbol
                 read_data();
+                if (sit == 1)
+                {
+                    from_file = true;
+                    file_read = file_read.Substring(file_read.LastIndexOfAny(new char[] { '/', '\\' }) + 1);
+                }
             }
             if (sit == 0)
             {
@@ -81,6 +84,7 @@ namespace coins_hockey
                         fl.WriteLine("replay");
                         fl.Close();
                         file_read = "replay";
+                        from_file = false;
                     }
                     catch { }
                 }
@@ -316,7 +320,12 @@ namespace coins_hockey
                 sit = 1;
                 replay_time = cnt_tick * 21;
             }
-            catch { }
+            catch (Exception excpt)
+            {
+                var dich = File.CreateText("./dich.txt");
+                dich.WriteLine(excpt.ToString());
+                dich.Close();
+            }
         }
         public static void klik(object sender, KeyEventArgs e)
         {
@@ -434,7 +443,7 @@ namespace coins_hockey
         }
         public static void close(object sender, EventArgs e)
         {
-            if (file_read != "")
+            if (file_read != "" && !from_file)
                 try
                 {
                     var fl = File.CreateText("./data.txt");
